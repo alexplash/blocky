@@ -32,6 +32,8 @@ dependencies:
     sdk: flutter
   firebase_auth: ^4.7.0
   firebase_core: ^2.15.0
+  cloud_firestore: ^4.8.3
+  firebase_storage: ^11.2.6
   image_picker: ^0.8.5+3
 
 
@@ -58,6 +60,13 @@ flutter:
 
   assets:
       - assets/images/
+  fonts:
+    - family: Dispence
+      fonts:
+        - asset: fonts/Dispence-odxz.ttf
+    - family: Debis
+      fonts:
+        - asset: fonts/DESIB___.TTF
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

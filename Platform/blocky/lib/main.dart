@@ -3,6 +3,8 @@ import 'backend/firebase_options.dart';
 import 'backend/auth_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -123,7 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                 margin: const EdgeInsets.only(left: 40.0, right: 40.0),
                 decoration: BoxDecoration(
                   color: Colors.black,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -292,7 +294,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 margin: const EdgeInsets.only(left: 40.0, right: 40.0),
                 decoration: BoxDecoration(
                   color: Colors.black,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -370,8 +372,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
   Future<void> attemptCreateAccount() async {
     setState(() {
-      createAccountErrorMessage =
-          '';
+      createAccountErrorMessage = '';
     });
 
     if (_passwordController.text != _confirmPasswordController.text) {
@@ -389,6 +390,20 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
       );
 
       print("Account created");
+
+      Navigator.of(context).push(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const ChooseUserInfoPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 300),
+        ),
+      );
     } on FirebaseAuthException catch (e) {
       switch (e.code) {
         case 'invalid-email':
@@ -419,9 +434,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     }
 
     if (createAccountErrorMessage.isNotEmpty) {
-      setState(() {
-        
-      });
+      setState(() {});
     }
   }
 
@@ -430,5 +443,134 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+}
+
+class ChooseUserInfoPage extends StatefulWidget {
+  const ChooseUserInfoPage({Key? key}) : super(key: key);
+
+  @override
+  _ChooseUserInfoPageState createState() => _ChooseUserInfoPageState();
+}
+
+class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
+  TextEditingController _usernameController = TextEditingController();
+  final ImagePicker imagePicker = ImagePicker();
+  String userType = '';
+  File? profileImage;
+  String profileImageURL = '';
+  String errorMessage = '';
+
+  Future<void> pickImage() async {
+    final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        profileImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  Widget _buildProfileImage() {
+    return GestureDetector(
+      onTap: pickImage,
+      child: CircleAvatar(
+        radius: 60,
+        backgroundColor: Colors.grey.shade800,
+        child: profileImage != null
+            ? ClipOval(child: Image.file(profileImage!, fit: BoxFit.cover, width: 120, height: 120,))
+            : Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade800,
+                  borderRadius: BorderRadius.circular(60),
+                ),
+                width: 120,
+                height: 120,
+                child: Icon(Icons.person, color: Colors.white, size: 60),
+              ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color.fromARGB(255, 17, 0, 47),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: MediaQuery.of(context).padding.top),
+              Image.asset(
+                'assets/images/main_icon.png',
+                width: MediaQuery.of(context).size.width * 0.2,
+              ),
+              Container(
+                padding: const EdgeInsets.all(20.0),
+                margin: const EdgeInsets.only(left: 40.0, right: 40.0),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildProfileImage(),
+                    SizedBox(height: 20),
+                    TextField(
+                      controller: _usernameController,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Username",
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        fillColor: Colors.grey[900],
+                        filled: true,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ElevatedButton(
+                              onPressed: () => setState(() => userType = 'Data Provider'),
+                              style: ElevatedButton.styleFrom(
+                                primary: userType == 'Data Provider' ? Colors.blue : const Color.fromARGB(255, 40, 33, 183),
+                              ),
+                              child: const Text('Data Provider', style: TextStyle(color: Colors.white),),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: ElevatedButton(
+                              onPressed: () => setState(() => userType = 'Data Seeker'),
+                              style: ElevatedButton.styleFrom(
+                                primary: userType == 'Data Seeker' ? Colors.blue : const Color.fromARGB(255, 40, 33, 183),
+                              ),
+                              child: const Text('Data Provider', style: TextStyle(color: Colors.white),),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    // The "Finish" button and error message display will be similar to the CreateAccountPage
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'backend/firebase_options.dart';
 import 'backend/auth_service.dart';
 import 'backend/firebase_connect.dart';
+import 'dataProv_prompt.dart';
+import 'dataSeek_prompt.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:image_picker/image_picker.dart';
 
@@ -22,72 +23,41 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: StreamBuilder<User?>(
         stream: AuthService().user,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.active) {
-            User? user = snapshot.data;
-            if (user == null) {
+        builder: (context, userSnapshot) {
+          if (userSnapshot.connectionState == ConnectionState.active) {
+            User? user = userSnapshot.data;
+            if (user != null) {
+              return FutureBuilder<Map<String, dynamic>?>(
+                future: FirestoreConnect().returnCurrentUserDocument(),
+                builder: (context, docSnapshot) {
+                  if (docSnapshot.connectionState != ConnectionState.done) {
+                    return const Scaffold(
+                      backgroundColor: Color.fromARGB(255, 17, 0, 47),
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  Map<String, dynamic>? userDoc = docSnapshot.data;
+                  if (userDoc != null &&
+                      userDoc['userType'] == 'Data Provider') {
+                    return DataProviderPromptPage();
+                  } else if (userDoc != null &&
+                      userDoc['userType'] == 'Data Seeker') {
+                    return DataSeekerPromptPage();
+                  } else {
+                    return const LoginPage();
+                  }
+                },
+              );
+            } else {
               return const LoginPage();
             }
-            return HomePage();
           } else {
             return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
+              backgroundColor: Color.fromARGB(255, 17, 0, 47),
+              body: Center(child: CircularProgressIndicator()),
             );
           }
         },
-      ),
-    );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  HomePage({Key? key}) : super(key: key);
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  final AuthService _authService = AuthService();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Main Page'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () async {
-              await _authService.signOut();
-            },
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'Welcome to the Main Page!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'You are now signed in.',
-              style: TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                await _authService.signOut();
-              },
-              child: const Text('Sign Out'),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -781,9 +751,13 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
     await firestoreConnect.addUserToDatabase(
         _usernameController.text, userType, profileImageUrl);
 
+    Widget nextPage = userType == 'Data Provider'
+        ? DataProviderPromptPage()
+        : DataSeekerPromptPage();
+
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => HomePage(),
+        pageBuilder: (context, animation, secondaryAnimation) => nextPage,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(opacity: animation, child: child);
         },

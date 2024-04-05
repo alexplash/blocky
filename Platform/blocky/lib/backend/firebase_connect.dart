@@ -47,4 +47,23 @@ class FirestoreConnect {
       });
     }
   }
+
+  Future<Map<String, dynamic>?> returnCurrentUserDocument() async {
+    User? currentUser = auth.currentUser;
+    if (currentUser == null) {
+      return null;
+    }
+
+    DocumentSnapshot providerSnapshot = await firestore.collection('data_providers').doc(currentUser.uid).get();
+    if (providerSnapshot.exists) {
+      return providerSnapshot.data() as Map<String, dynamic>;
+    }
+
+    DocumentSnapshot seekerSnapshot = await firestore.collection('data_seekers').doc(currentUser.uid).get();
+    if (seekerSnapshot.exists) {
+      return seekerSnapshot.data() as Map<String, dynamic>;
+    }
+
+    return null;
+  }
 }

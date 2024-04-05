@@ -1,125 +1,434 @@
 import 'package:flutter/material.dart';
+import 'backend/firebase_options.dart';
+import 'backend/auth_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: defaultFirebaseOptions);
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+      home: StreamBuilder<User?>(
+        stream: AuthService().user,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.active) {
+            User? user = snapshot.data;
+            if (user == null) {
+              return const LoginPage();
+            }
+            return MyHomePage();
+          } else {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+        },
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  MyHomePage({Key? key}) : super(key: key);
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: Text('Main Page'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async {
+              await _authService.signOut();
+            },
+          ),
+        ],
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              'Welcome to the Main Page!',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            const SizedBox(height: 20),
+            const Text(
+              'You are now signed in.',
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                await _authService.signOut();
+              },
+              child: const Text('Sign Out'),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+  String loginErrorMessage = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color.fromARGB(255, 17, 0, 47),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: MediaQuery.of(context).padding.top),
+              Image.asset(
+                'assets/images/main_icon.png',
+                width: MediaQuery.of(context).size.width * 0.2,
+              ),
+              Container(
+                padding: const EdgeInsets.all(20.0),
+                margin: const EdgeInsets.only(left: 40.0, right: 40.0),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextField(
+                      controller: _emailController,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Email",
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        fillColor: Colors.grey[900],
+                        filled: true,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Password",
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        fillColor: Colors.grey[900],
+                        filled: true,
+                      ),
+                    ),
+                    SizedBox(height: 40),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ElevatedButton(
+                              onPressed: attemptLogin,
+                              child: const Text('Login'),
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.deepPurple,
+                                onPrimary: Colors.white,
+                                minimumSize: Size(150, 48),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  PageRouteBuilder(
+                                    pageBuilder: (context, animation,
+                                            secondaryAnimation) =>
+                                        const CreateAccountPage(),
+                                    transitionsBuilder: (context, animation,
+                                        secondaryAnimation, child) {
+                                      return FadeTransition(
+                                        opacity: animation,
+                                        child: child,
+                                      );
+                                    },
+                                    transitionDuration:
+                                        const Duration(milliseconds: 300),
+                                  ),
+                                );
+                              },
+                              child: const Text('Create Account'),
+                              style: ElevatedButton.styleFrom(
+                                primary: Color.fromARGB(255, 40, 33, 183),
+                                onPrimary: Colors.white,
+                                minimumSize: Size(150, 48),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (loginErrorMessage.isNotEmpty)
+                      Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            loginErrorMessage,
+                            style: const TextStyle(
+                                color: Colors.red, fontSize: 14),
+                          ))
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void attemptLogin() async {
+    setState(() {
+      loginErrorMessage = '';
+    });
+
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      dynamic result = await _authService.signInWithEmailAndPassword(
+          _emailController.text, _passwordController.text);
+      if (result != null) {
+        print('Logged In');
+      } else {
+        setState(() {
+          loginErrorMessage = 'Incorrect credentials';
+        });
+      }
+    } else {
+      setState(() {
+        loginErrorMessage = 'Please fill in all fields';
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+}
+
+class CreateAccountPage extends StatefulWidget {
+  const CreateAccountPage({Key? key}) : super(key: key);
+
+  @override
+  _CreateAccountPageState createState() => _CreateAccountPageState();
+}
+
+class _CreateAccountPageState extends State<CreateAccountPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  final AuthService _authService = AuthService();
+  String createAccountErrorMessage = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color.fromARGB(255, 17, 0, 47),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: MediaQuery.of(context).padding.top),
+              Image.asset(
+                'assets/images/main_icon.png',
+                width: MediaQuery.of(context).size.width * 0.2,
+              ),
+              Container(
+                padding: const EdgeInsets.all(20.0),
+                margin: const EdgeInsets.only(left: 40.0, right: 40.0),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextField(
+                      controller: _emailController,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Email",
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        fillColor: Colors.grey[900],
+                        filled: true,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Password",
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        fillColor: Colors.grey[900],
+                        filled: true,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    TextField(
+                      controller: _confirmPasswordController,
+                      obscureText: true,
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Confirm Password",
+                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        fillColor: Colors.grey[900],
+                        filled: true,
+                      ),
+                    ),
+                    SizedBox(height: 40),
+                    ElevatedButton(
+                      onPressed: attemptCreateAccount,
+                      child: const Text('Continue'),
+                      style: ElevatedButton.styleFrom(
+                        primary: Color.fromARGB(255, 40, 33, 183),
+                        onPrimary: Colors.white,
+                        minimumSize: Size(150, 48),
+                      ),
+                    ),
+                    if (createAccountErrorMessage.isNotEmpty)
+                      Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            createAccountErrorMessage,
+                            style: const TextStyle(
+                                color: Colors.red, fontSize: 14),
+                          ))
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> attemptCreateAccount() async {
+    setState(() {
+      createAccountErrorMessage =
+          '';
+    });
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      setState(() {
+        createAccountErrorMessage = 'Passwords do not match';
+      });
+      return;
+    }
+
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+
+      print("Account created");
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'invalid-email':
+          createAccountErrorMessage = 'The email address is not valid.';
+          break;
+        case 'email-already-in-use':
+          createAccountErrorMessage = 'The email address is already in use.';
+          break;
+        case 'operation-not-allowed':
+          createAccountErrorMessage =
+              'Email and password accounts are not enabled.';
+          break;
+        case 'weak-password':
+          createAccountErrorMessage = 'The password is too weak.';
+          break;
+        case 'network-request-failed':
+          createAccountErrorMessage = 'Network error, please try again later.';
+          break;
+        case 'too-many-requests':
+          createAccountErrorMessage =
+              'Too many requests. Please try again later.';
+          break;
+        default:
+          createAccountErrorMessage = 'An undefined Error happened.';
+      }
+    } catch (e) {
+      createAccountErrorMessage = 'An error occurred. Please try again.';
+    }
+
+    if (createAccountErrorMessage.isNotEmpty) {
+      setState(() {
+        
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

@@ -105,13 +105,11 @@ class _LoginPageState extends State<LoginPage> {
                     TextField(
                       controller: _emailController,
                       style:
-                          TextStyle(color: Colors.white, fontFamily: 'Debis'),
+                          TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: "Email",
                         hintStyle: TextStyle(
-                            color: Colors.grey[500],
-                            fontFamily: 'Debis',
-                            fontWeight: FontWeight.bold),
+                            color: Colors.grey[500]),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -124,13 +122,11 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _passwordController,
                       obscureText: true,
                       style:
-                          TextStyle(color: Colors.white, fontFamily: 'Debis'),
+                          TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: "Password",
                         hintStyle: TextStyle(
-                            color: Colors.grey[500],
-                            fontFamily: 'Debis',
-                            fontWeight: FontWeight.bold),
+                            color: Colors.grey[500],),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -151,8 +147,7 @@ class _LoginPageState extends State<LoginPage> {
                                 'Login',
                                 style: TextStyle(
                                     color: Colors.white,
-                                    fontFamily: 'Debis',
-                                    fontWeight: FontWeight.bold),
+                                    fontFamily: 'Debis',),
                               ),
                               style: ElevatedButton.styleFrom(
                                 primary: Colors.deepPurple,
@@ -187,8 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                                 'Create Account',
                                 style: TextStyle(
                                     color: Colors.white,
-                                    fontFamily: 'Debis',
-                                    fontWeight: FontWeight.bold),
+                                    fontFamily: 'Debis',),
                               ),
                               style: ElevatedButton.styleFrom(
                                 primary: Color.fromARGB(255, 40, 33, 183),
@@ -206,8 +200,7 @@ class _LoginPageState extends State<LoginPage> {
                             loginErrorMessage,
                             style: const TextStyle(
                                 color: Colors.red,
-                                fontSize: 14,
-                                fontFamily: 'Debis'),
+                                fontSize: 14,),
                           ))
                   ],
                 ),
@@ -295,14 +288,11 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       controller: _emailController,
                       style: TextStyle(
                         color: Colors.white,
-                        fontFamily: 'Debis',
                       ),
                       decoration: InputDecoration(
                         hintText: "Email",
                         hintStyle: TextStyle(
-                            color: Colors.grey[500],
-                            fontFamily: 'Debis',
-                            fontWeight: FontWeight.bold),
+                            color: Colors.grey[500],),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -316,14 +306,11 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       obscureText: true,
                       style: TextStyle(
                         color: Colors.white,
-                        fontFamily: 'Debis',
                       ),
                       decoration: InputDecoration(
                         hintText: "Password",
                         hintStyle: TextStyle(
-                            color: Colors.grey[500],
-                            fontFamily: 'Debis',
-                            fontWeight: FontWeight.bold),
+                            color: Colors.grey[500],),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -337,14 +324,11 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       obscureText: true,
                       style: TextStyle(
                         color: Colors.white,
-                        fontFamily: 'Debis',
                       ),
                       decoration: InputDecoration(
                         hintText: "Confirm Password",
                         hintStyle: TextStyle(
-                            color: Colors.grey[500],
-                            fontFamily: 'Debis',
-                            fontWeight: FontWeight.bold),
+                            color: Colors.grey[500],),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -359,8 +343,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                         'Continue',
                         style: TextStyle(
                             color: Colors.white,
-                            fontFamily: 'Debis',
-                            fontWeight: FontWeight.bold),
+                            fontFamily: 'Debis',),
                       ),
                       style: ElevatedButton.styleFrom(
                         primary: Color.fromARGB(255, 40, 33, 183),
@@ -375,7 +358,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                             style: const TextStyle(
                               color: Colors.red,
                               fontSize: 14,
-                              fontFamily: 'Debis',
                             ),
                           ))
                   ],
@@ -569,14 +551,11 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                       controller: _usernameController,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontFamily: 'Debis',
                       ),
                       decoration: InputDecoration(
                         hintText: "Username",
                         hintStyle: TextStyle(
-                            color: Colors.grey[500],
-                            fontFamily: 'Debis',
-                            fontWeight: FontWeight.bold),
+                            color: Colors.grey[500],),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -608,7 +587,6 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontFamily: 'Debis',
-                                      fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
                                   ),
@@ -618,8 +596,6 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: Colors.white70,
-                                      fontFamily: 'Debis',
-                                      fontWeight: FontWeight.normal,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -649,7 +625,6 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontFamily: 'Debis',
-                                      fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
                                   ),
@@ -659,8 +634,6 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: Colors.white70,
-                                      fontFamily: 'Debis',
-                                      fontWeight: FontWeight.normal,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -679,8 +652,7 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                         'Finish',
                         style: TextStyle(
                             color: Colors.white,
-                            fontFamily: 'Debis',
-                            fontWeight: FontWeight.bold),
+                            fontFamily: 'Debis',),
                       ),
                       style: ElevatedButton.styleFrom(
                         primary: Color.fromARGB(255, 40, 33, 183),
@@ -695,7 +667,6 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                             style: const TextStyle(
                               color: Colors.red,
                               fontSize: 14,
-                              fontFamily: 'Debis',
                             ),
                           ))
                   ],

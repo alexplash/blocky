@@ -35,6 +35,27 @@ class FirestoreConnect {
     return snapshot.exists;
   }
 
+  Future<void> updateUserProfile(String oldUsername, String newUsername, String oldUserType, String newUserType, String profileImageUrl) async {
+    String? uid = auth.currentUser?.uid;
+    if (uid == null) return;
+
+    await firestore.collection('usernames').doc(oldUsername).delete();
+    await firestore.collection('usernames').doc(newUsername).set({'username': newUsername});
+
+    String oldUserTypeCollection = oldUserType == 'Data Provider' ? 'data_providers' : 'data_seekers';
+    String newUserTypeCollection = newUserType == 'Data Provider' ? 'data_providers' : 'data_seekers';
+
+    if (oldUserTypeCollection != newUserTypeCollection) {
+      await firestore.collection(oldUserTypeCollection).doc(uid).delete();
+    }
+    
+    await firestore.collection(newUserTypeCollection).doc(uid).set({
+      'username': newUsername,
+      'userType': newUserType,
+      'profileImageUrl': profileImageUrl
+    }, SetOptions(merge: true));
+  }
+
   Future<void> addUserToDatabase(String username, String userType, String profileImageUrl) async {
     String? uid = auth.currentUser?.uid;
     if (uid != null) {

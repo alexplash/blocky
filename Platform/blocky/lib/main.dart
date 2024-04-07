@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'backend/firebase_options.dart';
 import 'backend/auth_service.dart';
 import 'backend/firebase_connect.dart';
-import 'dataProv_prompt.dart';
+import 'dataProv_quest.dart';
 import 'dataSeek_prompt.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,8 +12,10 @@ import 'package:image_picker/image_picker.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: defaultFirebaseOptions);
-  runApp(MyApp());
+  runApp(MyApp(key: appKey));
 }
+
+GlobalKey<NavigatorState> appKey = GlobalKey();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -21,6 +23,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: appKey,
       home: StreamBuilder<User?>(
         stream: AuthService().user,
         builder: (context, userSnapshot) {
@@ -37,11 +40,11 @@ class MyApp extends StatelessWidget {
                     );
                   }
                   Map<String, dynamic>? userDoc = docSnapshot.data;
-                  if (userDoc != null &&
-                      userDoc['userType'] == 'Data Provider') {
-                    return DataProviderPromptPage();
-                  } else if (userDoc != null &&
-                      userDoc['userType'] == 'Data Seeker') {
+                  if (userDoc!['username'].isEmpty || userDoc['username'] == null) {
+                    return const ChooseUserInfoPage();
+                  } else if (userDoc['userType'] == 'Data Provider') {
+                    return DataProviderQuestionsPage();
+                  } else if (userDoc['userType'] == 'Data Seeker') {
                     return DataSeekerPromptPage();
                   } else {
                     return const LoginPage();
@@ -104,12 +107,10 @@ class _LoginPageState extends State<LoginPage> {
                   children: [
                     TextField(
                       controller: _emailController,
-                      style:
-                          TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: "Email",
-                        hintStyle: TextStyle(
-                            color: Colors.grey[500]),
+                        hintStyle: TextStyle(color: Colors.grey[500]),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -121,12 +122,12 @@ class _LoginPageState extends State<LoginPage> {
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
-                      style:
-                          TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: "Password",
                         hintStyle: TextStyle(
-                            color: Colors.grey[500],),
+                          color: Colors.grey[500],
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -146,8 +147,9 @@ class _LoginPageState extends State<LoginPage> {
                               child: const Text(
                                 'Login',
                                 style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Debis',),
+                                  color: Colors.white,
+                                  fontFamily: 'Debis',
+                                ),
                               ),
                               style: ElevatedButton.styleFrom(
                                 primary: Colors.deepPurple,
@@ -181,8 +183,9 @@ class _LoginPageState extends State<LoginPage> {
                               child: const Text(
                                 'Create Account',
                                 style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Debis',),
+                                  color: Colors.white,
+                                  fontFamily: 'Debis',
+                                ),
                               ),
                               style: ElevatedButton.styleFrom(
                                 primary: Color.fromARGB(255, 40, 33, 183),
@@ -199,8 +202,9 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text(
                             loginErrorMessage,
                             style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 14,),
+                              color: Colors.red,
+                              fontSize: 14,
+                            ),
                           ))
                   ],
                 ),
@@ -292,7 +296,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       decoration: InputDecoration(
                         hintText: "Email",
                         hintStyle: TextStyle(
-                            color: Colors.grey[500],),
+                          color: Colors.grey[500],
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -310,7 +315,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       decoration: InputDecoration(
                         hintText: "Password",
                         hintStyle: TextStyle(
-                            color: Colors.grey[500],),
+                          color: Colors.grey[500],
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -328,7 +334,8 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       decoration: InputDecoration(
                         hintText: "Confirm Password",
                         hintStyle: TextStyle(
-                            color: Colors.grey[500],),
+                          color: Colors.grey[500],
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -342,8 +349,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                       child: const Text(
                         'Continue',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Debis',),
+                          color: Colors.white,
+                          fontFamily: 'Debis',
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         primary: Color.fromARGB(255, 40, 33, 183),
@@ -555,7 +563,8 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                       decoration: InputDecoration(
                         hintText: "Username",
                         hintStyle: TextStyle(
-                            color: Colors.grey[500],),
+                          color: Colors.grey[500],
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -651,8 +660,9 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                       child: const Text(
                         'Finish',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Debis',),
+                          color: Colors.white,
+                          fontFamily: 'Debis',
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         primary: Color.fromARGB(255, 40, 33, 183),
@@ -723,7 +733,7 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
         _usernameController.text, userType, profileImageUrl);
 
     Widget nextPage = userType == 'Data Provider'
-        ? DataProviderPromptPage()
+        ? DataProviderQuestionsPage()
         : DataSeekerPromptPage();
 
     Navigator.of(context).pushReplacement(

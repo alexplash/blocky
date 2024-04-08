@@ -14,27 +14,6 @@ class _DataProviderQuestionsPageState extends State<DataProviderQuestionsPage> {
   final FirestoreConnect firestoreConnect = FirestoreConnect();
   final TextEditingController _questionController = TextEditingController();
 
-  final List<String> dataOptions = [
-    "Writing",
-    "Graphic",
-    "Music",
-    "Stock Market",
-    "Energy",
-    "CyberSecurity",
-    "Automotive",
-    "E-commerce",
-    "Agriculture",
-    "Machine Learning",
-    "Blockchain",
-    "Telecommunications",
-    "Healthcare",
-    "Fashion",
-    "Quantum Computing",
-    "Biotech",
-    "Gaming",
-    "Urban Planning",
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

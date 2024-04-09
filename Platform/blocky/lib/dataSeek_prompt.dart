@@ -13,6 +13,46 @@ class DataSeekerPromptPage extends StatefulWidget {
 class _DataSeekerPromptPageState extends State<DataSeekerPromptPage> {
   final FirestoreConnect firestoreConnect = FirestoreConnect();
   final TextEditingController _searchController = TextEditingController();
+  final List<String> options = [
+    'Writer',
+    'Graphic Designer',
+    'Videographer',
+    'Musician',
+    'Dataset Engineer'
+  ];
+  String? selectedCategory;
+
+  Widget _buildCheckboxList() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: options.map((option) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Checkbox(
+                  value: selectedCategory == option,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      if (value == true) {
+                        selectedCategory = option;
+                      } else {
+                        selectedCategory = null;
+                      }
+                    });
+                  },
+                ),
+                Text(option, style: TextStyle(color: Colors.grey[500])),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +104,7 @@ class _DataSeekerPromptPageState extends State<DataSeekerPromptPage> {
                         ),
                       ),
                     ),
-                    Text(
+                    const Text(
                       'Data Seeker',
                       style: TextStyle(
                         color: Colors.white,
@@ -74,13 +114,35 @@ class _DataSeekerPromptPageState extends State<DataSeekerPromptPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.only(
+                          bottom: 2),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Colors.white,
+                            width: 1.0,
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'What type of data provider do you need?',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildCheckboxList(),
+                    const SizedBox(height: 20),
                     TextField(
                       controller: _searchController,
                       maxLines: 4,
                       style: TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText:
-                            "What type of data and/or content are you looking for?",
+                            "Be specific with the type of data you need. Please include clear keywords in your description.",
                         hintStyle: TextStyle(color: Colors.grey[500]),
                         fillColor: Colors.grey[850],
                         filled: true,

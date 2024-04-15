@@ -152,7 +152,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                primary: Colors.deepPurple,
+                                backgroundColor: Colors.deepPurple,
                                 minimumSize: Size(150, 48),
                               ),
                             ),
@@ -188,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                               style: ElevatedButton.styleFrom(
-                                primary: Color.fromARGB(255, 40, 33, 183),
+                                backgroundColor: Color.fromARGB(255, 40, 33, 183),
                                 minimumSize: Size(150, 48),
                               ),
                             ),
@@ -354,7 +354,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(255, 40, 33, 183),
+                        backgroundColor: Color.fromARGB(255, 40, 33, 183),
                         minimumSize: Size(150, 48),
                       ),
                     ),
@@ -583,7 +583,7 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                               onPressed: () =>
                                   setState(() => userType = 'Data Provider'),
                               style: ElevatedButton.styleFrom(
-                                primary: userType == 'Data Provider'
+                                backgroundColor: userType == 'Data Provider'
                                     ? Colors.blue
                                     : const Color.fromARGB(255, 40, 33, 183),
                                 padding:
@@ -621,7 +621,7 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                               onPressed: () =>
                                   setState(() => userType = 'Data Seeker'),
                               style: ElevatedButton.styleFrom(
-                                primary: userType == 'Data Seeker'
+                                backgroundColor: userType == 'Data Seeker'
                                     ? Colors.blue
                                     : const Color.fromARGB(255, 40, 33, 183),
                                 padding:
@@ -665,7 +665,7 @@ class _ChooseUserInfoPageState extends State<ChooseUserInfoPage> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(255, 40, 33, 183),
+                        backgroundColor: Color.fromARGB(255, 40, 33, 183),
                         minimumSize: Size(150, 48),
                       ),
                     ),

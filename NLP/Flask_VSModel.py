@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
-import gensim
+from flask_cors import CORS
 import gensim.downloader as api
 from gensim.models import KeyedVectors
 import os
 import numpy as np
 
 app = Flask(__name__)
+CORS(app)
 
 Model_Path = 'VSModel_Cache/fasttext-wiki-news-subwords-300.model'
 
@@ -29,18 +30,11 @@ def load_model():
 ftModel = load_model()
 
 def vectorize(phrase):
-    if phrase in ftModel:
-        return ftModel[phrase]
     words = phrase.split()
-    word_vectors = []
-    for word in words:
-        if word in ftModel:
-            word_vectors.append(ftModel[word])
-        else:
-            return np.zeros(ftModel.vector_size)
-    if word_vectors:
-        return np.mean(word_vectors, axis = 0)
-    return np.zeros(ftModel.vector_size)
+    word_vectors = [ftModel[word] for word in words if word in ftModel]
+    if not word_vectors:
+        return None
+    return np.mean(word_vectors, axis=0)
 
 @app.route('/similarity', methods = ['POST'])
 def calculate_similarity():
@@ -51,8 +45,9 @@ def calculate_similarity():
         return jsonify({'error': 'Missing words'}), 400
     v1 = vectorize(word1)
     v2 = vectorize(word2)
-    similarity = ftModel.cosine_similarities(v1, [v2])[0]
-    similarity = float(similarity)
+    if v1 is None or v2 is None:
+        return jsonify({'similarity': 0})
+    similarity = float(ftModel.cosine_similarities(v1, [v2])[0])
     return jsonify({'similarity': similarity})
 
 if __name__ == '__main__':

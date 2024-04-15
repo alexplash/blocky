@@ -214,7 +214,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                               onPressed: () =>
                                   setState(() => userType = 'Data Provider'),
                               style: ElevatedButton.styleFrom(
-                                primary: userType == 'Data Provider'
+                                backgroundColor: userType == 'Data Provider'
                                     ? Colors.blue
                                     : const Color.fromARGB(255, 40, 33, 183),
                                 padding:
@@ -252,7 +252,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                               onPressed: () =>
                                   setState(() => userType = 'Data Seeker'),
                               style: ElevatedButton.styleFrom(
-                                primary: userType == 'Data Seeker'
+                                backgroundColor: userType == 'Data Seeker'
                                     ? Colors.blue
                                     : const Color.fromARGB(255, 40, 33, 183),
                                 padding:
@@ -296,7 +296,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                             fontFamily: 'Debis',
                           )),
                       style: ElevatedButton.styleFrom(
-                        primary: const Color.fromARGB(255, 40, 33, 183),
+                        backgroundColor: const Color.fromARGB(255, 40, 33, 183),
                         minimumSize: const Size(150, 48),
                       ),
                     ),

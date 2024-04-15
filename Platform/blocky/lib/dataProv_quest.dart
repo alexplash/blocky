@@ -22,6 +22,16 @@ class _DataProviderQuestionsPageState extends State<DataProviderQuestionsPage> {
   ];
   String? selectedCategory;
 
+  @override
+  void initState() {
+    super.initState();
+    _questionController.addListener(() {
+      setState(() {
+        
+      });
+    });
+  }
+
   Widget _buildCheckboxList() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -150,6 +160,8 @@ class _DataProviderQuestionsPageState extends State<DataProviderQuestionsPage> {
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none,
                         ),
+                        counterStyle: const TextStyle(color: Colors.white),
+                        counterText: "${_questionController.text.length}/200"
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -165,7 +177,7 @@ class _DataProviderQuestionsPageState extends State<DataProviderQuestionsPage> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(255, 40, 33, 183),
+                        backgroundColor: Color.fromARGB(255, 40, 33, 183),
                         minimumSize: Size(150, 48),
                       ),
                     ),
@@ -181,6 +193,11 @@ class _DataProviderQuestionsPageState extends State<DataProviderQuestionsPage> {
 
   @override
   void dispose() {
+    _questionController.removeListener(() {
+      setState(() {
+        
+      });
+    });
     _questionController.dispose();
     super.dispose();
   }

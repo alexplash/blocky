@@ -30,12 +30,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_auth: ^4.7.0
+  firebase_auth: ^4.19.1
   firebase_core: ^2.15.0
-  cloud_firestore: ^4.8.3
-  firebase_storage: ^11.2.6
-  image_picker: ^0.8.5+3
-  http: ^0.13.3
+  cloud_firestore: ^4.16.1
+  firebase_storage: ^11.7.1
+  image_picker: ^1.0.8
+  http: ^1.2.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -51,7 +51,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

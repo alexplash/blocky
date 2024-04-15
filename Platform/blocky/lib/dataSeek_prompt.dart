@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'backend/auth_service.dart';
 import 'backend/firebase_connect.dart';
 import 'userInfo.dart';
+import 'dataSeek_search.dart';
 
 class DataSeekerPromptPage extends StatefulWidget {
+
   DataSeekerPromptPage({Key? key}) : super(key: key);
 
   @override
@@ -21,6 +23,15 @@ class _DataSeekerPromptPageState extends State<DataSeekerPromptPage> {
     'Dataset Engineer'
   ];
   String? selectedCategory;
+  String errorMessage = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {});
+    });
+  }
 
   Widget _buildCheckboxList() {
     return SingleChildScrollView(
@@ -115,8 +126,7 @@ class _DataSeekerPromptPageState extends State<DataSeekerPromptPage> {
                     ),
                     const SizedBox(height: 20),
                     Container(
-                      padding: const EdgeInsets.only(
-                          bottom: 2),
+                      padding: const EdgeInsets.only(bottom: 2),
                       decoration: const BoxDecoration(
                         border: Border(
                           bottom: BorderSide(
@@ -139,24 +149,24 @@ class _DataSeekerPromptPageState extends State<DataSeekerPromptPage> {
                     TextField(
                       controller: _searchController,
                       maxLines: 4,
-                      style: TextStyle(color: Colors.white),
+                      maxLength: 200,
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        hintText:
-                            "Be specific with the type of data you need. Please include clear keywords in your description.",
-                        hintStyle: TextStyle(color: Colors.grey[500]),
-                        fillColor: Colors.grey[850],
-                        filled: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
+                          hintText:
+                              "Be specific with the type of data you need. Please include clear keywords in your description.",
+                          hintStyle: TextStyle(color: Colors.grey[500]),
+                          fillColor: Colors.grey[850],
+                          filled: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
+                          counterStyle: const TextStyle(color: Colors.white),
+                          counterText: "${_searchController.text.length}/200"),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
-                      onPressed: () {
-                        // Implement the search functionality here
-                      },
+                      onPressed: onSearch,
                       child: const Text(
                         'Search',
                         style: TextStyle(
@@ -165,10 +175,20 @@ class _DataSeekerPromptPageState extends State<DataSeekerPromptPage> {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(255, 40, 33, 183),
+                        backgroundColor: Color.fromARGB(255, 40, 33, 183),
                         minimumSize: Size(150, 48),
                       ),
                     ),
+                    if (errorMessage.isNotEmpty)
+                      Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            errorMessage,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 14,
+                            ),
+                          ))
                   ],
                 ),
               ),
@@ -179,8 +199,44 @@ class _DataSeekerPromptPageState extends State<DataSeekerPromptPage> {
     );
   }
 
+  Future<void> onSearch() async {
+    setState(() {
+      errorMessage = "";
+    });
+    if (selectedCategory == null || selectedCategory!.isEmpty) {
+      setState(() {
+        errorMessage = "Please select the type of data provider you desire";
+      });
+      return;
+    }
+    if (_searchController.text.length < 50) {
+      setState(() {
+        errorMessage =
+            "Please use more than 50 characters in your data description";
+      });
+      return;
+    }
+
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            DataSeekerSearchPage(category: selectedCategory!, prompt: _searchController.text),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 600),
+      ),
+    );
+  }
+
   @override
   void dispose() {
+    _searchController.removeListener(() {
+      setState(() {});
+    });
     _searchController.dispose();
     super.dispose();
   }

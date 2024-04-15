@@ -15,8 +15,10 @@ class FirestoreConnect {
     return _instance;
   }
 
-  Future<String?> uploadProfileImage(Uint8List fileBytes, String username) async {
-    String fileName = "${Path.basename(username)}_${DateTime.now().millisecondsSinceEpoch}.jpg";
+  Future<String?> uploadProfileImage(
+      Uint8List fileBytes, String username) async {
+    String fileName =
+        "${Path.basename(username)}_${DateTime.now().millisecondsSinceEpoch}.jpg";
     Reference ref = storage.ref().child('profileImages/$fileName');
 
     try {
@@ -31,24 +33,31 @@ class FirestoreConnect {
   }
 
   Future<bool> isUsernameTaken(String username) async {
-    DocumentSnapshot snapshot = await firestore.collection('usernames').doc(username).get();
+    DocumentSnapshot snapshot =
+        await firestore.collection('usernames').doc(username).get();
     return snapshot.exists;
   }
 
-  Future<void> updateUserProfile(String oldUsername, String newUsername, String oldUserType, String newUserType, String profileImageUrl) async {
+  Future<void> updateUserProfile(String oldUsername, String newUsername,
+      String oldUserType, String newUserType, String profileImageUrl) async {
     String? uid = auth.currentUser?.uid;
     if (uid == null) return;
 
     await firestore.collection('usernames').doc(oldUsername).delete();
-    await firestore.collection('usernames').doc(newUsername).set({'username': newUsername});
+    await firestore
+        .collection('usernames')
+        .doc(newUsername)
+        .set({'username': newUsername});
 
-    String oldUserTypeCollection = oldUserType == 'Data Provider' ? 'data_providers' : 'data_seekers';
-    String newUserTypeCollection = newUserType == 'Data Provider' ? 'data_providers' : 'data_seekers';
+    String oldUserTypeCollection =
+        oldUserType == 'Data Provider' ? 'data_providers' : 'data_seekers';
+    String newUserTypeCollection =
+        newUserType == 'Data Provider' ? 'data_providers' : 'data_seekers';
 
     if (oldUserTypeCollection != newUserTypeCollection) {
       await firestore.collection(oldUserTypeCollection).doc(uid).delete();
     }
-    
+
     await firestore.collection(newUserTypeCollection).doc(uid).set({
       'username': newUsername,
       'userType': newUserType,
@@ -56,11 +65,16 @@ class FirestoreConnect {
     }, SetOptions(merge: true));
   }
 
-  Future<void> addUserToDatabase(String username, String userType, String profileImageUrl) async {
+  Future<void> addUserToDatabase(
+      String username, String userType, String profileImageUrl) async {
     String? uid = auth.currentUser?.uid;
     if (uid != null) {
-      await firestore.collection('usernames').doc(username).set({'username': username});
-      String collection = userType == 'Data Provider' ? 'data_providers' : 'data_seekers';
+      await firestore
+          .collection('usernames')
+          .doc(username)
+          .set({'username': username});
+      String collection =
+          userType == 'Data Provider' ? 'data_providers' : 'data_seekers';
       await firestore.collection(collection).doc(uid).set({
         'username': username,
         'userType': userType,
@@ -75,16 +89,72 @@ class FirestoreConnect {
       return null;
     }
 
-    DocumentSnapshot providerSnapshot = await firestore.collection('data_providers').doc(currentUser.uid).get();
+    DocumentSnapshot providerSnapshot =
+        await firestore.collection('data_providers').doc(currentUser.uid).get();
     if (providerSnapshot.exists) {
       return providerSnapshot.data() as Map<String, dynamic>;
     }
 
-    DocumentSnapshot seekerSnapshot = await firestore.collection('data_seekers').doc(currentUser.uid).get();
+    DocumentSnapshot seekerSnapshot =
+        await firestore.collection('data_seekers').doc(currentUser.uid).get();
     if (seekerSnapshot.exists) {
       return seekerSnapshot.data() as Map<String, dynamic>;
     }
 
     return null;
+  }
+
+  Future<Map<String, List<String>>> fetchCategoryProviders(
+      String categoryName) async {
+    Map<String, List<String>> categoryMap = {};
+    String formattedCategory = categoryName.toLowerCase().replaceAll(' ', '_');
+
+    try {
+      DocumentSnapshot subCategoryDoc = await firestore
+          .collection('subCategoryNames')
+          .doc(formattedCategory)
+          .get();
+      if (!subCategoryDoc.exists || subCategoryDoc.data() == null) {
+        print("No subcategory information available for $categoryName");
+        return categoryMap;
+      }
+
+      Map<String, dynamic> subCategoriesData =
+          subCategoryDoc.data()! as Map<String, dynamic>;
+      List<String> subCollectionNames = subCategoriesData.keys
+          .where((k) => subCategoriesData[k] == 1)
+          .toList();
+
+      DocumentReference categoryDocRef =
+          firestore.collection('categories').doc(formattedCategory);
+
+      for (String subCollectionName in subCollectionNames) {
+        CollectionReference subRef =
+            categoryDocRef.collection(subCollectionName);
+        QuerySnapshot snapshot = await subRef.get();
+        List<String> userIds = snapshot.docs.map((doc) => doc.id).toList();
+        categoryMap[subCollectionName] = userIds;
+      }
+    } catch (e) {
+      print('An error occurred while fetching category providers: $e');
+    }
+
+    return categoryMap;
+  }
+
+  Future<Map<String, dynamic>?> getProviderInfo(String userId) async {
+    try {
+      DocumentSnapshot snapshot =
+        await firestore.collection('data_providers').doc(userId).get();
+      if (snapshot.exists) {
+        return snapshot.data() as Map<String, dynamic>;
+      } else {
+        print("No data found for user ID: $userId");
+        return null;
+      }
+    } catch (e) {
+      print("Error fetching user data: $e");
+      return null;
+    }
   }
 }

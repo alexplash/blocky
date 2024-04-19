@@ -24,6 +24,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
   Uint8List? profileImageBytes;
   String? profileImageUrl;
   String errorMessage = '';
+  bool isLoading = true;
 
   void initState() {
     super.initState();
@@ -39,7 +40,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
         userType = userDoc['userType'];
         currentUserType = userDoc['userType'];
       });
-      
+
       if (userDoc['profileImageUrl'].isNotEmpty) {
         String storageUrl = userDoc['profileImageUrl'];
         final ref = FirebaseStorage.instance.refFromURL(storageUrl);
@@ -50,6 +51,9 @@ class _UserInfoPageState extends State<UserInfoPage> {
         print(actualImageUrl);
       }
     }
+    setState(() {
+      isLoading = !isLoading;
+    });
   }
 
   Future<void> pickImage() async {
@@ -114,210 +118,217 @@ class _UserInfoPageState extends State<UserInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 17, 0, 47),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: MediaQuery.of(context).padding.top),
-              Image.asset(
-                'assets/images/main_icon.png',
-                width: MediaQuery.of(context).size.width * 0.2,
-              ),
-              Container(
-                padding: const EdgeInsets.all(20.0),
-                margin:
-                    const EdgeInsets.only(left: 40.0, right: 40.0, top: 20.0),
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: BorderRadius.circular(20),
+    if (isLoading) {
+      return const Scaffold(
+          backgroundColor: Color.fromARGB(255, 17, 0, 47),
+          body: Center(child: CircularProgressIndicator()));
+    } else {
+      return Scaffold(
+        backgroundColor: const Color.fromARGB(255, 17, 0, 47),
+        body: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: MediaQuery.of(context).padding.top),
+                Image.asset(
+                  'assets/images/main_icon.png',
+                  width: MediaQuery.of(context).size.width * 0.2,
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back,
-                              color: Colors.white, size: 30),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            await authService.signOut();
-                            Navigator.of(context)
-                                .popUntil((route) => route.isFirst);
-                          },
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side:
-                                const BorderSide(color: Colors.white, width: 2),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20)),
+                Container(
+                  padding: const EdgeInsets.all(20.0),
+                  margin:
+                      const EdgeInsets.only(left: 40.0, right: 40.0, top: 20.0),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back,
+                                color: Colors.white, size: 30),
+                            onPressed: () => Navigator.pop(context),
                           ),
-                          child: const Text('Log out',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold)),
-                        ),
-                      ],
-                    ),
-                    const Text(
-                      'User Info',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontFamily: 'Debis',
+                          TextButton(
+                            onPressed: () async {
+                              await authService.signOut();
+                              Navigator.of(context)
+                                  .popUntil((route) => route.isFirst);
+                            },
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              side: const BorderSide(
+                                  color: Colors.white, width: 2),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
+                            ),
+                            child: const Text('Log out',
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        ],
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    _buildProfileImage(),
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: TextField(
-                        controller: _usernameController,
-                        style: const TextStyle(
+                      const Text(
+                        'User Info',
+                        style: TextStyle(
                           color: Colors.white,
+                          fontSize: 24,
+                          fontFamily: 'Debis',
                         ),
-                        decoration: const InputDecoration(
-                          labelText: "Username",
-                          labelStyle: TextStyle(
-                            color: Colors.white,
-                          ),
-                          hintStyle: TextStyle(
-                            color: Colors.white54,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blue),
-                          ),
-                        ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
-                            child: ElevatedButton(
-                              onPressed: () =>
-                                  setState(() => userType = 'Data Provider'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: userType == 'Data Provider'
-                                    ? Colors.blue
-                                    : const Color.fromARGB(255, 40, 33, 183),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12.0),
-                              ),
-                              child: const Column(
-                                children: [
-                                  Text(
-                                    'Data Provider',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Debis',
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    'Market and distribute your unique work to the community of Blocky.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: ElevatedButton(
-                              onPressed: () =>
-                                  setState(() => userType = 'Data Seeker'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: userType == 'Data Seeker'
-                                    ? Colors.blue
-                                    : const Color.fromARGB(255, 40, 33, 183),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 12.0),
-                              ),
-                              child: const Column(
-                                children: [
-                                  Text(
-                                    'Data Seeker',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Debis',
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    'Access quality data for your needs: custom datasets, work samples, or artpieces.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    ElevatedButton(
-                      onPressed: updateProfile,
-                      child: const Text("Update Profile",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Debis',
-                          )),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 40, 33, 183),
-                        minimumSize: const Size(150, 48),
-                      ),
-                    ),
-                    if (errorMessage.isNotEmpty)
+                      const SizedBox(height: 20),
+                      _buildProfileImage(),
+                      const SizedBox(height: 10),
                       Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            errorMessage,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 14,
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextField(
+                          controller: _usernameController,
+                          style: const TextStyle(
+                            color: Colors.white,
+                          ),
+                          decoration: const InputDecoration(
+                            labelText: "Username",
+                            labelStyle: TextStyle(
+                              color: Colors.white,
                             ),
-                          ))
-                  ],
+                            hintStyle: TextStyle(
+                              color: Colors.white54,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    setState(() => userType = 'Data Provider'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: userType == 'Data Provider'
+                                      ? Colors.blue
+                                      : const Color.fromARGB(255, 40, 33, 183),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12.0),
+                                ),
+                                child: const Column(
+                                  children: [
+                                    Text(
+                                      'Data Provider',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Debis',
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      'Market and distribute your unique work to the community of Blocky.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8.0),
+                              child: ElevatedButton(
+                                onPressed: () =>
+                                    setState(() => userType = 'Data Seeker'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: userType == 'Data Seeker'
+                                      ? Colors.blue
+                                      : const Color.fromARGB(255, 40, 33, 183),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12.0),
+                                ),
+                                child: const Column(
+                                  children: [
+                                    Text(
+                                      'Data Seeker',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Debis',
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      'Access quality data for your needs: custom datasets, work samples, or artpieces.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      ElevatedButton(
+                        onPressed: updateProfile,
+                        child: const Text("Update Profile",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Debis',
+                            )),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              const Color.fromARGB(255, 40, 33, 183),
+                          minimumSize: const Size(150, 48),
+                        ),
+                      ),
+                      if (errorMessage.isNotEmpty)
+                        Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              errorMessage,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 14,
+                              ),
+                            ))
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Future<void> updateProfile() async {
@@ -349,7 +360,8 @@ class _UserInfoPageState extends State<UserInfoPage> {
         }
       }
 
-      newProfileImageUrl =  await firestoreConnect.uploadProfileImage(profileImageBytes!, newUsername);
+      newProfileImageUrl = await firestoreConnect.uploadProfileImage(
+          profileImageBytes!, newUsername);
       if (newProfileImageUrl == null) {
         setState(() {
           errorMessage = 'Failed to upload image';
@@ -358,7 +370,12 @@ class _UserInfoPageState extends State<UserInfoPage> {
       }
     }
 
-    await firestoreConnect.updateUserProfile(currentUsername!, newUsername, currentUserType!, userType, newProfileImageUrl ?? "");
+    setState(() {
+      isLoading = true;
+    });
+
+    await firestoreConnect.updateUserProfile(currentUsername!, newUsername,
+        currentUserType!, userType, newProfileImageUrl ?? "");
 
     setState(() {
       errorMessage = '';

@@ -4,6 +4,7 @@ import gensim.downloader as api
 from gensim.models import KeyedVectors
 import os
 import numpy as np
+from gradio_client import Client
 
 app = Flask(__name__)
 CORS(app)
@@ -36,6 +37,8 @@ def vectorize(phrase):
         return None
     return np.mean(word_vectors, axis=0)
 
+hf_client = Client("alexplash/blockymatchingSpace")
+
 @app.route('/similarity', methods = ['POST'])
 def calculate_similarity():
     data = request.get_json()
@@ -49,6 +52,21 @@ def calculate_similarity():
         return jsonify({'similarity': 0})
     similarity = float(ftModel.cosine_similarities(v1, [v2])[0])
     return jsonify({'similarity': similarity})
+
+@app.route('/categorize', methods = ['POST'])
+def categorize():
+    data = request.get_json()
+    if 'input' not in data:
+        return jsonify({'error': 'No input provided'}), 400
+    
+    try:
+        result = hf_client.predict(
+            input=data['input'],
+            api_name="/predict"
+        )
+        return jsonify({'result': result})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

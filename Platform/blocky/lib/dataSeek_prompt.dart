@@ -79,7 +79,7 @@ class _DataSeekerPromptPageState extends State<DataSeekerPromptPage> {
               SizedBox(height: MediaQuery.of(context).padding.top),
               Image.asset(
                 'assets/images/main_icon.png',
-                width: MediaQuery.of(context).size.width * 0.2,
+                width: MediaQuery.of(context).size.width * 0.1,
               ),
               Container(
                 padding: const EdgeInsets.all(20.0),

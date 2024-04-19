@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'backend/firebase_connect.dart';
+import 'userProfile_class.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -36,29 +37,37 @@ class _DataSeekerSearchPageState extends State<DataSeekerSearchPage> {
     });
   }
 
-  Future<void> bloomOutputProcess(prompt) async {
-    // temporary function until we figure out how to integrate the bloom model. modelOutput then becomes the output of the bloom model, when given the prompt input
-    String modelOutput = """
-        Description of Work/Data:
-        'I'm seeking data concerning Jewish Heritage Month, and the production of yamukas in Oman, the nation. Also in UAE or in Djibouti.'
-        KEYWORDS: 'Jewish Heritage Month, YAMUKAS, OMAN, UAE, DJIBOUTI' END
-        KEYWORDS: 'ENGRAVING, YAMUKAS, OMAN, UAE, DJIBOUTI'
-    """;
-    modelOutput = modelOutput.trim();
-    if (!modelOutput.endsWith("END")) {
-      modelOutput += " END";
+  Future<void> bloomOutputProcess(String prompt) async {
+    var url = Uri.parse('http://127.0.0.1:5000/categorize');
+    try {
+      var response = await http.post(url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'input': prompt}));
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        String modelOutput = data['result'];
+        modelOutput = modelOutput.trim();
+        List<String> keywordsList = [];
+
+        RegExp exp = RegExp(r"KEYWORDS: \s*'([^#]+)' ### END");
+        Iterable<RegExpMatch> matches = exp.allMatches(modelOutput);
+        for (RegExpMatch match in matches) {
+          String keywords = match.group(1)!;
+          List<String> words =
+              keywords.split(',').map((s) => s.trim().toLowerCase()).toList();
+          keywordsList.addAll(words);
+        }
+        keywordsList = keywordsList.toSet().toList();
+        subCategories = keywordsList;
+        print(subCategories);
+      } else {
+        print(
+            'Failed to load categorized data with status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Exception caught while requesting categorization: $e');
     }
-    List<String> keywordsList = [];
-    RegExp exp = RegExp(r"KEYWORDS: '(.*?)'( END|$)");
-    Iterable<RegExpMatch> matches = exp.allMatches(modelOutput);
-    for (RegExpMatch match in matches) {
-      String keywords = match.group(1)!;
-      List<String> words =
-          keywords.split(',').map((s) => s.trim().toLowerCase()).toList();
-      keywordsList.addAll(words);
-    }
-    keywordsList = keywordsList.toSet().toList();
-    subCategories = keywordsList;
   }
 
   Future<void> createProviderMap(
@@ -184,84 +193,100 @@ class _DataSeekerSearchPageState extends State<DataSeekerSearchPage> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 20),
-                      ...sortedUserProfiles
-                          .map((profile) => ListTile(
-                                leading: CircleAvatar(
-                                  radius: 60,
-                                  backgroundColor: Colors.grey.shade800,
-                                  backgroundImage: profile.profileImageUrl !=
-                                          null
-                                      ? NetworkImage(profile.profileImageUrl)
-                                      : null,
-                                  child: (profile.profileImageUrl == null ||
-                                          profile.profileImageUrl == '')
-                                      ? Container(
-                                          width: 30,
-                                          height: 30,
-                                          decoration: BoxDecoration(
-                                            color: Colors.grey.shade800,
-                                            borderRadius:
-                                                BorderRadius.circular(60),
+                      sortedUserProfiles.isEmpty
+                          ? const Text(
+                              'No data providers found for your specifications',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            )
+                          : Column(
+                              children: sortedUserProfiles
+                                  .map((profile) => ListTile(
+                                        leading: CircleAvatar(
+                                          radius: 60,
+                                          backgroundColor: Colors.grey.shade800,
+                                          backgroundImage:
+                                              profile.profileImageUrl != null
+                                                  ? NetworkImage(
+                                                      profile.profileImageUrl)
+                                                  : null,
+                                          child: (profile.profileImageUrl ==
+                                                      null ||
+                                                  profile.profileImageUrl == '')
+                                              ? Container(
+                                                  width: 30,
+                                                  height: 30,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade800,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            60),
+                                                  ),
+                                                  child: const Icon(
+                                                      Icons.person,
+                                                      color: Colors.white60,
+                                                      size: 30),
+                                                )
+                                              : null,
+                                        ),
+                                        title: IntrinsicWidth(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.only(
+                                                    bottom: 2),
+                                                decoration: const BoxDecoration(
+                                                  border: Border(
+                                                    bottom: BorderSide(
+                                                      color: Colors.white,
+                                                      width: 1.0,
+                                                    ),
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                  profile.username,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          child: const Icon(Icons.person,
-                                              color: Colors.white60, size: 30),
-                                        )
-                                      : null,
-                                ),
-                                title: IntrinsicWidth(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 2),
-                                        decoration: const BoxDecoration(
-                                          border: Border(
-                                            bottom: BorderSide(
-                                              color: Colors.white,
-                                              width: 1.0,
+                                        ),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            Text(
+                                              'Category: ${profile.category}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
                                             ),
-                                          ),
+                                            Text(
+                                              'Subcategories: ${profile.sub}',
+                                              style: const TextStyle(
+                                                color: Colors.white70,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        child: Text(
-                                          profile.username,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
+                                        trailing: IconButton(
+                                          icon: const Icon(Icons.chat,
+                                              color: Colors.white70),
+                                          onPressed: () {},
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      'Category: ${profile.category}',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Subcategories: ${profile.sub}',
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.chat,
-                                      color: Colors.white70),
-                                  onPressed: () {},
-                                ),
-                              ))
-                          .toList(),
+                                      ))
+                                  .toList(),
+                            )
                     ],
                   ),
                 ),
@@ -276,26 +301,5 @@ class _DataSeekerSearchPageState extends State<DataSeekerSearchPage> {
   @override
   void dispose() {
     super.dispose();
-  }
-}
-
-class UserProfile {
-  String username;
-  String category;
-  String sub;
-  String profileImageUrl;
-  int count;
-
-  UserProfile(
-      this.username, this.category, this.sub, this.profileImageUrl, this.count);
-
-  factory UserProfile.fromMap(Map<String, dynamic> data, int count) {
-    return UserProfile(
-      data['username'] as String,
-      data['category'] as String,
-      data['sub'] as String,
-      data['profileImageUrl'] as String ?? '',
-      count,
-    );
   }
 }

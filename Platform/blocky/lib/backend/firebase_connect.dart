@@ -43,6 +43,17 @@ class FirestoreConnect {
     String? uid = auth.currentUser?.uid;
     if (uid == null) return;
 
+    if (oldUserType == 'Data Provider' && newUserType == 'Data Seeker') {
+      var providerInfo = await getProviderInfo(uid);
+      if (providerInfo != null) {
+        String category = providerInfo['category'] ?? '';
+        List<String> subcategories = providerInfo['sub']?.split(', ') ?? [];
+        if (category != '' && subcategories.isNotEmpty) {
+          await removeFromCategories(uid, subcategories, category);
+        }
+      }
+    }
+
     await firestore.collection('usernames').doc(oldUsername).delete();
     await firestore
         .collection('usernames')
@@ -156,5 +167,65 @@ class FirestoreConnect {
       print("Error fetching user data: $e");
       return null;
     }
+  }
+
+  Future<void> removeFromCategories(String userId, List<String> subcategories, String category) async {
+    String formattedCategory = category.toLowerCase().replaceAll(' ', '_');
+    DocumentReference categoryRef = firestore.collection('categories').doc(formattedCategory);
+    List<String> emptySubcategories = [];
+
+    for (String subcategory in subcategories) {
+      DocumentReference subRef = categoryRef.collection(subcategory).doc(userId);
+      await subRef.delete();
+      QuerySnapshot snapshot = await categoryRef.collection(subcategory).get();
+      if (snapshot.docs.isEmpty) {
+        emptySubcategories.add(subcategory);
+      }
+    }
+
+    if (emptySubcategories.isNotEmpty) {
+      DocumentReference subCategoryNamesRef = firestore.collection('subCategoryNames').doc(formattedCategory);
+      Map<String, dynamic> updates = {};
+      for (String emptySub in emptySubcategories) {
+        updates[emptySub] = FieldValue.delete();
+      }
+      await subCategoryNamesRef.update(updates);
+    }
+  }
+
+  Future<void> addToCategories(String userId, List<String> subcategories, String category) async {
+    String formattedCategory = category.toLowerCase().replaceAll(' ', '_');
+    DocumentReference categoryRef = firestore.collection('categories').doc(formattedCategory);
+    DocumentReference subCategoryNamesRef = firestore.collection('subCategoryNames').doc(formattedCategory);
+
+    DocumentSnapshot subCategoryDoc = await subCategoryNamesRef.get();
+    Map<String, dynamic> subCategoryData = {};
+    if (subCategoryDoc.data() != null) {
+      subCategoryData = subCategoryDoc.data() as Map<String, dynamic>;
+    }
+    Map<String, dynamic> updates = {};
+    for (String sub in subcategories) {
+      if (!subCategoryData.containsKey(sub) || subCategoryData[sub] != 1) {
+        updates[sub] = 1;
+      }
+    }
+    if (updates.isNotEmpty) {
+      await subCategoryNamesRef.set(updates, SetOptions(merge: true));
+    }
+
+    for (String subcategory in subcategories) {
+      DocumentReference subRef = categoryRef.collection(subcategory).doc(userId);
+      await subRef.set({'active': true});
+    }
+  }
+
+  Future<void> updateProviderCategories(String userId, List<String> sub, String category) async {
+    DocumentReference userRef = firestore.collection('data_providers').doc(userId);
+    String subString = sub.join(', ');
+
+    await userRef.update({
+      'category': category,
+      'sub': subString
+    });
   }
 }

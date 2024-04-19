@@ -147,6 +147,63 @@ class _DataSeekerSearchPageState extends State<DataSeekerSearchPage> {
     }
   }
 
+  void showMessageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          title: const Text(
+            "Message this Provider",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold
+            )
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                style: const TextStyle(
+                  color: Colors.white
+                ),
+                decoration: InputDecoration(
+                  hintText: "Type your message here",
+                  hintStyle: const TextStyle(color: Colors.grey),
+                  filled: true,
+                  fillColor: Colors.black,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none
+                  )
+                )
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+
+                },
+                child: const Text(
+                  "Send",
+                  style: TextStyle(color: Colors.black),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18)
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12)
+                )
+              ),
+            ]
+          )
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -280,9 +337,11 @@ class _DataSeekerSearchPageState extends State<DataSeekerSearchPage> {
                                           ],
                                         ),
                                         trailing: IconButton(
-                                          icon: const Icon(Icons.chat,
-                                              color: Colors.white70),
-                                          onPressed: () {},
+                                          icon: const Icon(Icons.handshake,
+                                              color: Colors.grey),
+                                          onPressed: () {
+                                            showMessageDialog(context);
+                                          },
                                         ),
                                       ))
                                   .toList(),

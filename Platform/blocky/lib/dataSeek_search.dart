@@ -124,7 +124,7 @@ class _DataSeekerSearchPageState extends State<DataSeekerSearchPage> {
       fetchFutures
           .add(firestoreConnect.getProviderInfo(userId).then((profileData) {
         if (profileData != null) {
-          return UserProfile.fromMap(profileData, count);
+          return UserProfile.fromMap(profileData, userId, count);
         }
         return null;
       }).catchError((e) {
@@ -147,61 +147,64 @@ class _DataSeekerSearchPageState extends State<DataSeekerSearchPage> {
     }
   }
 
-  void showMessageDialog(BuildContext context) {
+  void showRequestDialog(BuildContext context, String receiverId) {
     showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.black,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-          title: const Text(
-            "Message this Provider",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold
-            )
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                style: const TextStyle(
-                  color: Colors.white
-                ),
-                decoration: InputDecoration(
-                  hintText: "Type your message here",
-                  hintStyle: const TextStyle(color: Colors.grey),
-                  filled: true,
-                  fillColor: Colors.black,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none
-                  )
-                )
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-
-                },
-                child: const Text(
-                  "Send",
-                  style: TextStyle(color: Colors.black),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18)
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return AlertDialog(
+                backgroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0)),
+                title: const Text("Add Provider to Mailbox",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
+                content:
+                    Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text(
+                            "Cancel",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Color.fromARGB(46, 158, 158, 158),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18)),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 32, vertical: 12))),
+                      const SizedBox(width: 20),
+                      ElevatedButton(
+                          onPressed: () async {
+                            await firestoreConnect.addToSeekerMailbox(
+                              firestoreConnect.auth.currentUser?.uid ?? '',
+                              receiverId,
+                            );
+                            Navigator.pop(context);
+                          },
+                          child: const Text(
+                            "Confirm",
+                            style: TextStyle(color: Colors.black),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18)),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 32, vertical: 12))),
+                    ],
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12)
-                )
-              ),
-            ]
-          )
-        );
-      }
-    );
+                  const SizedBox(height: 10),
+                ]));
+          });
+        });
   }
 
   @override
@@ -337,10 +340,11 @@ class _DataSeekerSearchPageState extends State<DataSeekerSearchPage> {
                                           ],
                                         ),
                                         trailing: IconButton(
-                                          icon: const Icon(Icons.handshake,
+                                          icon: const Icon(Icons.add,
                                               color: Colors.grey),
                                           onPressed: () {
-                                            showMessageDialog(context);
+                                            showRequestDialog(
+                                                context, profile.userId);
                                           },
                                         ),
                                       ))

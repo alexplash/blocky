@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'backend/auth_service.dart';
 import 'backend/firebase_connect.dart';
 import 'userInfo.dart';
+import 'dataSeek_viewMailbox.dart';
 import 'dataSeek_search.dart';
 
 class DataSeekerPromptPage extends StatefulWidget {
-
   DataSeekerPromptPage({Key? key}) : super(key: key);
 
   @override
@@ -92,28 +91,53 @@ class _DataSeekerPromptPageState extends State<DataSeekerPromptPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: IconButton(
-                        icon: const Icon(Icons.account_circle,
-                            color: Colors.white, size: 30),
-                        onPressed: () => Navigator.of(context).push(
-                          PageRouteBuilder(
-                            pageBuilder:
-                                (context, animation, secondaryAnimation) =>
-                                    UserInfoPage(),
-                            transitionsBuilder: (context, animation,
-                                secondaryAnimation, child) {
-                              return FadeTransition(
-                                opacity: animation,
-                                child: child,
-                              );
-                            },
-                            transitionDuration:
-                                const Duration(milliseconds: 300),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment
+                          .spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.account_circle,
+                              color: Colors.white, size: 30),
+                          onPressed: () => Navigator.of(context).push(
+                            PageRouteBuilder(
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      UserInfoPage(),
+                              transitionsBuilder: (context, animation,
+                                  secondaryAnimation, child) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                              transitionDuration:
+                                  const Duration(milliseconds: 300),
+                            ),
                           ),
                         ),
-                      ),
+                        IconButton(
+                          icon: const Icon(Icons.mail,
+                              color: Colors.white,
+                              size:
+                                  30),
+                          onPressed: () => Navigator.of(context).push(
+                            PageRouteBuilder(
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      DataSeekerMailboxPage(),
+                              transitionsBuilder: (context, animation,
+                                  secondaryAnimation, child) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                              transitionDuration:
+                                  const Duration(milliseconds: 300),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const Text(
                       'Data Seeker',
@@ -220,7 +244,8 @@ class _DataSeekerPromptPageState extends State<DataSeekerPromptPage> {
     Navigator.of(context).push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            DataSeekerSearchPage(category: selectedCategory!, prompt: _searchController.text),
+            DataSeekerSearchPage(
+                category: selectedCategory!, prompt: _searchController.text),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
             opacity: animation,

@@ -156,7 +156,7 @@ class FirestoreConnect {
   Future<Map<String, dynamic>?> getProviderInfo(String userId) async {
     try {
       DocumentSnapshot snapshot =
-        await firestore.collection('data_providers').doc(userId).get();
+          await firestore.collection('data_providers').doc(userId).get();
       if (snapshot.exists) {
         return snapshot.data() as Map<String, dynamic>;
       } else {
@@ -169,13 +169,16 @@ class FirestoreConnect {
     }
   }
 
-  Future<void> removeFromCategories(String userId, List<String> subcategories, String category) async {
+  Future<void> removeFromCategories(
+      String userId, List<String> subcategories, String category) async {
     String formattedCategory = category.toLowerCase().replaceAll(' ', '_');
-    DocumentReference categoryRef = firestore.collection('categories').doc(formattedCategory);
+    DocumentReference categoryRef =
+        firestore.collection('categories').doc(formattedCategory);
     List<String> emptySubcategories = [];
 
     for (String subcategory in subcategories) {
-      DocumentReference subRef = categoryRef.collection(subcategory).doc(userId);
+      DocumentReference subRef =
+          categoryRef.collection(subcategory).doc(userId);
       await subRef.delete();
       QuerySnapshot snapshot = await categoryRef.collection(subcategory).get();
       if (snapshot.docs.isEmpty) {
@@ -184,7 +187,8 @@ class FirestoreConnect {
     }
 
     if (emptySubcategories.isNotEmpty) {
-      DocumentReference subCategoryNamesRef = firestore.collection('subCategoryNames').doc(formattedCategory);
+      DocumentReference subCategoryNamesRef =
+          firestore.collection('subCategoryNames').doc(formattedCategory);
       Map<String, dynamic> updates = {};
       for (String emptySub in emptySubcategories) {
         updates[emptySub] = FieldValue.delete();
@@ -193,10 +197,13 @@ class FirestoreConnect {
     }
   }
 
-  Future<void> addToCategories(String userId, List<String> subcategories, String category) async {
+  Future<void> addToCategories(
+      String userId, List<String> subcategories, String category) async {
     String formattedCategory = category.toLowerCase().replaceAll(' ', '_');
-    DocumentReference categoryRef = firestore.collection('categories').doc(formattedCategory);
-    DocumentReference subCategoryNamesRef = firestore.collection('subCategoryNames').doc(formattedCategory);
+    DocumentReference categoryRef =
+        firestore.collection('categories').doc(formattedCategory);
+    DocumentReference subCategoryNamesRef =
+        firestore.collection('subCategoryNames').doc(formattedCategory);
 
     DocumentSnapshot subCategoryDoc = await subCategoryNamesRef.get();
     Map<String, dynamic> subCategoryData = {};
@@ -214,18 +221,92 @@ class FirestoreConnect {
     }
 
     for (String subcategory in subcategories) {
-      DocumentReference subRef = categoryRef.collection(subcategory).doc(userId);
+      DocumentReference subRef =
+          categoryRef.collection(subcategory).doc(userId);
       await subRef.set({'active': true});
     }
   }
 
-  Future<void> updateProviderCategories(String userId, List<String> sub, String category) async {
-    DocumentReference userRef = firestore.collection('data_providers').doc(userId);
+  Future<void> updateProviderCategories(
+      String userId, List<String> sub, String category) async {
+    DocumentReference userRef =
+        firestore.collection('data_providers').doc(userId);
     String subString = sub.join(', ');
 
-    await userRef.update({
-      'category': category,
-      'sub': subString
+    await userRef.update({'category': category, 'sub': subString});
+  }
+
+  Future<void> addToSeekerMailbox(String senderId, String receiverId) async {
+    DocumentReference sentRef = firestore
+        .collection('data_seekers')
+        .doc(senderId)
+        .collection('mailbox')
+        .doc(receiverId);
+    await sentRef.set({'mailbox': true}, SetOptions(merge: true));
+  }
+
+  Future<void> removeFromSeekerMailbox(
+      String senderId, String receiverId) async {
+    DocumentReference sentRef = firestore
+        .collection('data_seekers')
+        .doc(senderId)
+        .collection('mailbox')
+        .doc(receiverId);
+    try {
+      await firestore.runTransaction((transaction) async {
+        transaction.delete(sentRef);
+      });
+    } catch (e) {
+      print("Error deleting documents: $e");
+    }
+  }
+
+  Future<Map<String, dynamic>?> returnSeekerMailbox(senderId) async {
+    DocumentReference seekerRef =
+        firestore.collection('data_seekers').doc(senderId);
+    CollectionReference sentRequestsRef = seekerRef.collection('mailbox');
+    QuerySnapshot snapshot = await sentRequestsRef.get();
+
+    Map<String, dynamic> requests = {};
+    for (var doc in snapshot.docs) {
+      requests[doc.id] = doc.get('mailbox') as bool;
+    }
+
+    return requests;
+  }
+
+  Future<void> saveAgentConfiguration(String userId, Map<String, dynamic> configData) async {
+    DocumentReference userRef =
+        firestore.collection('data_providers').doc(userId);
+    List<Future> tasks = [];
+
+    configData.forEach((key, value) {
+      DocumentReference agentConfigRef =
+          userRef.collection('agentConfig').doc(key);
+      var task = agentConfigRef.set({'answer': value}, SetOptions(merge: true));
+      tasks.add(task);
     });
+
+    try {
+      await Future.wait(tasks);
+    } catch (e) {
+      print('Error saving configuration: $e');
+      throw e;
+    }
+  }
+
+  Future<Map<String, dynamic>?> returnAgentConfiguration(String userId) async {
+    CollectionReference agentConfigRef = firestore.collection('data_providers').doc(userId).collection('agentConfig');
+    QuerySnapshot agentConfigSnapshot = await agentConfigRef.get();
+
+    if (agentConfigSnapshot.docs.isEmpty) {
+      return null;
+    }
+    
+    Map<String, dynamic> configData = {};
+    for (var doc in agentConfigSnapshot.docs) {
+      configData[doc.id] = doc.get('answer');
+    }
+    return configData;
   }
 }

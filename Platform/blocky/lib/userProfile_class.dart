@@ -1,4 +1,5 @@
 class UserProfile {
+  String userId;
   String username;
   String category;
   String sub;
@@ -6,10 +7,11 @@ class UserProfile {
   int count;
 
   UserProfile(
-      this.username, this.category, this.sub, this.profileImageUrl, this.count);
+      this.userId, this.username, this.category, this.sub, this.profileImageUrl, this.count);
 
-  factory UserProfile.fromMap(Map<String, dynamic> data, int count) {
+  factory UserProfile.fromMap(Map<String, dynamic> data, String userId, int count) {
     return UserProfile(
+      userId,
       data['username'] as String,
       data['category'] as String,
       data['sub'] as String,

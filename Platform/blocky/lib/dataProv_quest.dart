@@ -1,3 +1,4 @@
+import 'package:blocky/dataProv_configAgent.dart';
 import 'package:flutter/material.dart';
 import 'backend/auth_service.dart';
 import 'backend/firebase_connect.dart';
@@ -97,6 +98,147 @@ class _DataProviderQuestionsPageState extends State<DataProviderQuestionsPage> {
     );
   }
 
+  void showAgentDialog(
+      BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0)),
+            title: const Text("Configure your Agent",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(46, 158, 158, 158),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 12)),
+                    ),
+                    const SizedBox(width: 20),
+                    ElevatedButton(
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).push(
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        DataProvConfigAgentPage(),
+                                transitionsBuilder: (context, animation,
+                                    secondaryAnimation, child) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                                transitionDuration:
+                                    const Duration(milliseconds: 300),
+                              ),
+                            );
+                      },
+                      child: const Text(
+                        "Continue",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 12)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          );
+        });
+      },
+    );
+  }
+
+  void showRequireDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: Colors.black,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20.0)),
+            title: const Text("Define Profile Details",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(46, 158, 158, 158),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 12)),
+                    ),
+                    const SizedBox(width: 20),
+                    ElevatedButton(
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        "Ok",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 12)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          );
+        });
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -129,28 +271,41 @@ class _DataProviderQuestionsPageState extends State<DataProviderQuestionsPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: IconButton(
-                          icon: const Icon(Icons.account_circle,
-                              color: Colors.white, size: 30),
-                          onPressed: () => Navigator.of(context).push(
-                            PageRouteBuilder(
-                              pageBuilder:
-                                  (context, animation, secondaryAnimation) =>
-                                      UserInfoPage(),
-                              transitionsBuilder: (context, animation,
-                                  secondaryAnimation, child) {
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                );
-                              },
-                              transitionDuration:
-                                  const Duration(milliseconds: 300),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.account_circle,
+                                color: Colors.white, size: 30),
+                            onPressed: () => Navigator.of(context).push(
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        UserInfoPage(),
+                                transitionsBuilder: (context, animation,
+                                    secondaryAnimation, child) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                                transitionDuration:
+                                    const Duration(milliseconds: 300),
+                              ),
                             ),
                           ),
-                        ),
+                          IconButton(
+                            icon: const Icon(Icons.support_agent,
+                                color: Colors.white, size: 30),
+                            onPressed: () {
+                              if (oldSub.isEmpty || oldCategory == null) {
+                                showRequireDialog(context);
+                              } else {
+                                showAgentDialog(context);
+                              }
+                            },
+                          ),
+                        ],
                       ),
                       const Text(
                         'Data Provider',
@@ -297,10 +452,12 @@ class _DataProviderQuestionsPageState extends State<DataProviderQuestionsPage> {
       String userId = firestoreConnect.auth.currentUser!.uid;
       try {
         if (oldSub.isNotEmpty && oldCategory != null) {
-          await firestoreConnect.removeFromCategories(userId, oldSub, oldCategory!);
+          await firestoreConnect.removeFromCategories(
+              userId, oldSub, oldCategory!);
         }
         await firestoreConnect.addToCategories(userId, newSub, newCategory);
-        await firestoreConnect.updateProviderCategories(userId, newSub, newCategory);
+        await firestoreConnect.updateProviderCategories(
+            userId, newSub, newCategory);
       } catch (e) {
         print("Error during Firestore operations: $e");
         setState(() {

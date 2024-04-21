@@ -220,8 +220,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                             child: Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: ElevatedButton(
-                                onPressed: () =>
-                                    setState(() => userType = 'Data Provider'),
+                                onPressed: () {},
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: userType == 'Data Provider'
                                       ? Colors.blue
@@ -258,8 +257,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                             child: Padding(
                               padding: const EdgeInsets.only(left: 8.0),
                               child: ElevatedButton(
-                                onPressed: () =>
-                                    setState(() => userType = 'Data Seeker'),
+                                onPressed: () {},
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: userType == 'Data Seeker'
                                       ? Colors.blue

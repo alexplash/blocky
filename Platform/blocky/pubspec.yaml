@@ -36,6 +36,7 @@ dependencies:
   firebase_storage: ^11.7.1
   image_picker: ^1.0.8
   http: ^1.2.1
+  webview_flutter: ^3.0.0
 
 
   # The following adds the Cupertino Icons font to your application.

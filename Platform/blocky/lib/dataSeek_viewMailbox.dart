@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'backend/firebase_connect.dart';
+import 'dataSeek_agentChat.dart';
 
 class DataSeekerMailboxPage extends StatefulWidget {
   DataSeekerMailboxPage({Key? key}) : super(key: key);
@@ -121,7 +122,7 @@ class _DataSeekerMailboxPageState extends State<DataSeekerMailboxPage> {
   }
 
   void showAgentDialog(
-      BuildContext context, String receiverId) {
+      BuildContext context, String providerId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -158,7 +159,25 @@ class _DataSeekerMailboxPageState extends State<DataSeekerMailboxPage> {
                     ),
                     const SizedBox(width: 20),
                     ElevatedButton(
-                      onPressed: () async {},
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).push(
+                            PageRouteBuilder(
+                              pageBuilder:
+                                  (context, animation, secondaryAnimation) =>
+                                      DataSeekerAgentChatPage(providerId: providerId),
+                              transitionsBuilder: (context, animation,
+                                  secondaryAnimation, child) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                              transitionDuration:
+                                  const Duration(milliseconds: 300),
+                            ),
+                          );
+                      },
                       child: const Text(
                         "Confirm",
                         style: TextStyle(color: Colors.black),

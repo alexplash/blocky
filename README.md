@@ -1,6 +1,6 @@
 <p float="left">
-  <img src="Blocky.png" width="48%" />
-  <img src="Blocky_Architecture.png" width="48%" /> 
+  <img src="images/Blocky.png" width="48%" />
+  <img src="images/Blocky_Architecture.png" width="48%" /> 
 </p>
 
 # Blocky

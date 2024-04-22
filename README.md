@@ -7,6 +7,9 @@
   Your browser does not support the video tag.
 </video>
 
+## Video Demo:
+https://www.youtube.com/watch?v=sX34DBn07GM
+
 # Blocky
 Blocky is an innovative platform that seamlessly connects data seekers with data providers through the strategic use of AI-powered autonomous agents and NLP models. Through negotiations with these AI agents, ETH solidity smart contracts are drafted to facilitate secure transactions of data. Blocky allows for data seekers to find data providers to acquire hyper niche and specific custom data: writing samples, graphic designs, videos, music, datasets.
 

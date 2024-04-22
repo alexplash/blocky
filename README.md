@@ -2,10 +2,6 @@
   <img src="images/Blocky.png" width="30%" />
   <img src="images/Blocky_Architecture.png" width="48%" /> 
 </p>
-<video width="320" height="240" controls>
-  <source src="images/demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
 
 ## Video Demo:
 https://www.youtube.com/watch?v=sX34DBn07GM

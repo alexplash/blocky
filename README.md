@@ -1,2 +1,13 @@
 # Blocky
-Blocky is an innovative platform that seamlessly connects data seekers with providers through the strategic use of AI-powered autonomous agents and advanced blockchain technology. Blocky employs autonomous agents to perform tasks such as matching users with the most suitable data providers, negotiating terms, and creating secure, tailored blockchain contracts. The platform leverages a sophisticated vector space model to analyze user inputs and match them with the ideal providers based on similarity in requirements. Additionally, Blocky incorporates the Bloom AI model to enhance the accuracy and relevance of matches by efficiently filtering through vast amounts of data. Integrated with the Google Gemini API, Blocky offers a user-friendly interface where users can easily interact with AI agents to specify their precise data needs. This ensures all transactions are not only secure and transparent but also compliant with prevailing legal standards. By automating critical aspects of data transactions and maintaining high standards of data integrity and provider reliability, Blocky stands as a robust solution for acquiring and exchanging niche datasets securely across diverse industries
+Blocky is an innovative platform that seamlessly connects data seekers with data providers through the strategic use of AI-powered autonomous agents and NLP models. Through negotiations with these AI agents, ETH solidity smart contracts are drafted to facilitate secure transactions of data. Blocky allows for data seekers to find data providers to acquire hyper niche and specific custom data: writing samples, graphic designs, videos, music, datasets.
+
+Blocky uses a fine-tuned bloom-3b model, as well as a 300-dimensional vector space model, to match data seekers with the most suitable data providers. Integrated with the Google Gemini API, data providers can configure their AI agents to negotiate with data seekers, for the purpose of drafting ETH smart contracts. This ensures all transactions are not only secure and transparent, but also compliant with prevailing legal standards.
+
+The tech stack includes:
+  1) Flutter: Dart
+  2) Flask: Python backend server
+  3) Firebase database
+  4) bloom-3b LM
+  5) FastText VS model
+  6) Gemini-Pro LM
+  7) Solidity smart contracts
